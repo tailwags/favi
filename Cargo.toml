@@ -3,4 +3,12 @@ name = "favi"
 version = "0.1.0"
 edition = "2024"
 
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+
 [dependencies]
+
+[build-dependencies]
+cmake = "0.1.58"

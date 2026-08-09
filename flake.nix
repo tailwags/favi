@@ -32,6 +32,9 @@
               cargo-expand
               cargo-bloat
               nasm
+              cmake
+              ninja
+              meson
               (rust-bin.stable.latest.default.override {
                 extensions = [ "rust-src" "rust-analyzer" ];
                 targets = ["wasm32-unknown-unknown"];
