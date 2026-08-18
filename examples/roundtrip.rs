@@ -1,6 +1,6 @@
 //! libavif FFI smoke test: encodes a solid-gray image with libaom (encode-only
-//! build) and decodes it back with dav1d, through the hand-written FFI surface
-//! exposed by the `favi` library (see `src/lib.rs`).
+//! build) and decodes it back with dav1d, through the bindgen-generated FFI
+//! surface exposed by the `favi` library (see `src/sys.rs`).
 //!
 //! The example must call the `avif*` entry points *through the library crate*:
 //! Cargo only applies `cargo:rustc-link-lib=static=avif` to the library
@@ -10,16 +10,15 @@
 //!
 //! Run with: `cargo run --example roundtrip`
 
-use std::ffi::{c_char, CStr};
+use std::ffi::{CStr, c_char};
 use std::ptr;
 
-use favi::{
-    avifCodecName, avifDecoderCreate, avifDecoderDestroy, avifDecoderReadMemory,
-    avifEncoderCreate, avifEncoderDestroy, avifEncoderWrite, avifImageCreate,
-    avifImageCreateEmpty, avifImageDestroy, avifImageRGBToYUV, avifImageYUVToRGB, avifRWDataFree,
-    avifVersion, AvifResult, AvifRgbImage, AvifRWData, AVIF_CODEC_CHOICE_AOM,
-    AVIF_CODEC_CHOICE_DAV1D, AVIF_CODEC_FLAG_CAN_DECODE, AVIF_CODEC_FLAG_CAN_ENCODE,
-    AVIF_PIXEL_FORMAT_YUV420, AVIF_RESULT_OK, AVIF_RGB_FORMAT_RGB,
+use favi::sys::{
+    avifChromaDownsampling, avifChromaUpsampling, avifCodecChoice, avifCodecFlag, avifCodecName,
+    avifDecoderCreate, avifDecoderDestroy, avifDecoderReadMemory, avifEncoderCreate,
+    avifEncoderDestroy, avifEncoderWrite, avifImageCreate, avifImageCreateEmpty, avifImageDestroy,
+    avifImageRGBToYUV, avifImageYUVToRGB, avifPixelFormat, avifRGBFormat, avifRGBImage, avifRWData,
+    avifRWDataFree, avifResult, avifVersion,
 };
 
 // ---------------------------------------------------------------------------
@@ -29,10 +28,11 @@ use favi::{
 const WIDTH: u32 = 64;
 const HEIGHT: u32 = 64;
 
-fn check(result: AvifResult, what: &str) {
+fn check(result: avifResult, what: &str) {
     assert_eq!(
-        result, AVIF_RESULT_OK,
-        "{what} failed with avifResult {result}"
+        result,
+        avifResult::AVIF_RESULT_OK,
+        "{what} failed with avifResult {result:?}"
     );
 }
 
@@ -40,24 +40,26 @@ unsafe fn cstr(ptr: *const c_char) -> String {
     assert!(!ptr.is_null(), "expected non-null string from libavif");
     // SAFETY: ptr was returned by libavif as a valid NUL-terminated string
     // (avifVersion()/avifCodecName() return static strings).
-    unsafe { CStr::from_ptr(ptr) }.to_string_lossy().into_owned()
+    unsafe { CStr::from_ptr(ptr) }
+        .to_string_lossy()
+        .into_owned()
 }
 
-fn rgb_image(pixels: *mut u8, row_bytes: u32) -> AvifRgbImage {
-    AvifRgbImage {
+fn rgb_image(pixels: *mut u8, row_bytes: u32) -> avifRGBImage {
+    avifRGBImage {
         width: WIDTH,
         height: HEIGHT,
         depth: 8,
-        format: AVIF_RGB_FORMAT_RGB,
-        chroma_upsampling: 0, // AVIF_CHROMA_UPSAMPLING_AUTOMATIC
-        chroma_downsampling: 0, // AVIF_CHROMA_DOWNSAMPLING_AUTOMATIC
-        avoid_libyuv: 0,
-        ignore_alpha: 0,
-        alpha_premultiplied: 0,
-        is_float: 0,
-        max_threads: 1,
+        format: avifRGBFormat::AVIF_RGB_FORMAT_RGB,
+        chromaUpsampling: avifChromaUpsampling::AVIF_CHROMA_UPSAMPLING_AUTOMATIC,
+        chromaDownsampling: avifChromaDownsampling::AVIF_CHROMA_DOWNSAMPLING_AUTOMATIC,
+        avoidLibYUV: 0,
+        ignoreAlpha: 0,
+        alphaPremultiplied: 0,
+        isFloat: 0,
+        maxThreads: 1,
         pixels,
-        row_bytes,
+        rowBytes: row_bytes,
     }
 }
 
@@ -72,10 +74,32 @@ fn main() {
 
     // 2. Verify the codec configuration actually compiled in:
     //    aom = encode only, dav1d = decode only.
-    let aom_encode = unsafe { avifCodecName(AVIF_CODEC_CHOICE_AOM, AVIF_CODEC_FLAG_CAN_ENCODE) };
-    let aom_decode = unsafe { avifCodecName(AVIF_CODEC_CHOICE_AOM, AVIF_CODEC_FLAG_CAN_DECODE) };
-    let dav1d_decode = unsafe { avifCodecName(AVIF_CODEC_CHOICE_DAV1D, AVIF_CODEC_FLAG_CAN_DECODE) };
-    let dav1d_encode = unsafe { avifCodecName(AVIF_CODEC_CHOICE_DAV1D, AVIF_CODEC_FLAG_CAN_ENCODE) };
+    // `avifCodecFlags` is a plain u32 in the generated bindings, so unwrap the
+    // `avifCodecFlag` newtype with `.0`.
+    let aom_encode = unsafe {
+        avifCodecName(
+            avifCodecChoice::AVIF_CODEC_CHOICE_AOM,
+            avifCodecFlag::AVIF_CODEC_FLAG_CAN_ENCODE.0,
+        )
+    };
+    let aom_decode = unsafe {
+        avifCodecName(
+            avifCodecChoice::AVIF_CODEC_CHOICE_AOM,
+            avifCodecFlag::AVIF_CODEC_FLAG_CAN_DECODE.0,
+        )
+    };
+    let dav1d_decode = unsafe {
+        avifCodecName(
+            avifCodecChoice::AVIF_CODEC_CHOICE_DAV1D,
+            avifCodecFlag::AVIF_CODEC_FLAG_CAN_DECODE.0,
+        )
+    };
+    let dav1d_encode = unsafe {
+        avifCodecName(
+            avifCodecChoice::AVIF_CODEC_CHOICE_DAV1D,
+            avifCodecFlag::AVIF_CODEC_FLAG_CAN_ENCODE.0,
+        )
+    };
     assert_eq!(
         unsafe { cstr(aom_encode) },
         "aom",
@@ -100,7 +124,8 @@ fn main() {
     let mut src_pixels = vec![128u8; (WIDTH * HEIGHT * 3) as usize];
     let src_rgb = rgb_image(src_pixels.as_mut_ptr(), WIDTH * 3);
 
-    let image = unsafe { avifImageCreate(WIDTH, HEIGHT, 8, AVIF_PIXEL_FORMAT_YUV420) };
+    let image =
+        unsafe { avifImageCreate(WIDTH, HEIGHT, 8, avifPixelFormat::AVIF_PIXEL_FORMAT_YUV420) };
     assert!(!image.is_null(), "avifImageCreate failed");
     check(
         unsafe { avifImageRGBToYUV(image, &src_rgb) },
@@ -109,7 +134,7 @@ fn main() {
 
     let encoder = unsafe { avifEncoderCreate() };
     assert!(!encoder.is_null(), "avifEncoderCreate failed");
-    let mut encoded = AvifRWData {
+    let mut encoded = avifRWData {
         data: ptr::null_mut(),
         size: 0,
     };
@@ -118,7 +143,10 @@ fn main() {
         "avifEncoderWrite",
     );
     assert!(encoded.size > 0, "encoder produced an empty file");
-    println!("encoded {WIDTH}x{HEIGHT} gray image -> {} bytes", encoded.size);
+    println!(
+        "encoded {WIDTH}x{HEIGHT} gray image -> {} bytes",
+        encoded.size
+    );
 
     // 4. Decode side (dav1d): read the encoded bytes back and convert to RGB.
     let decoder = unsafe { avifDecoderCreate() };

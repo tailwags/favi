@@ -36,10 +36,15 @@
               ninja
               meson
               (rust-bin.stable.latest.default.override {
-                extensions = [ "rust-src" "rust-analyzer" ];
-                targets = ["wasm32-unknown-unknown"];
+                extensions = [
+                  "rust-src"
+                  "rust-analyzer"
+                ];
+                targets = [ "wasm32-unknown-unknown" ];
               })
             ];
+
+            LIBCLANG_PATH = "${pkgs.libclang.lib}/lib";
           };
         }
       );
