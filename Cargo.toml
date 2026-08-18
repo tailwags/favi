@@ -15,3 +15,42 @@ strip = true
 
 [build-dependencies]
 cmake = "0.1.58"
+pkg-config = { version = "0.3", optional = true }
+
+[features]
+default = ["aom-encode", "dav1d", "libyuv"]
+
+# libaom: AV1 encoder and decoder. Unlike the other codecs it has no bare
+# feature: `aom-encode` and `aom-decode` enable each half independently
+# and `aom-system` switches the mode to SYSTEM
+aom-encode = []
+aom-decode = []
+aom-system = ["dep:pkg-config"]
+
+# dav1d: AV1 decoder (fast, assembly-optimized).
+dav1d = []
+dav1d-system = ["dav1d", "dep:pkg-config"]
+
+# libgav1: AV1 decoder (Google, C++).
+libgav1 = []
+libgav1-system = ["libgav1", "dep:pkg-config"]
+
+# rav1e: AV1 encoder (pure Rust).
+rav1e = []
+rav1e-system = ["rav1e", "dep:pkg-config"]
+
+# SVT-AV1: AV1 encoder (Intel/Netflix).
+svt = []
+svt-system = ["svt", "dep:pkg-config"]
+
+# AVM: AV2 encoder and decoder (experimental).
+avm = []
+avm-system = ["avm", "dep:pkg-config"]
+
+# libyuv: fast YUV<->RGB conversion. 
+libyuv = []
+libyuv-system = ["libyuv", "dep:pkg-config"]
+
+# libsharpyuv: sharp RGB->YUV conversion (part of libwebp).
+libsharpyuv = []
+libsharpyuv-system = ["libsharpyuv", "dep:pkg-config"]

@@ -35,6 +35,7 @@
               cmake
               ninja
               meson
+              pkg-config
               (rust-bin.stable.latest.default.override {
                 extensions = [
                   "rust-src"
