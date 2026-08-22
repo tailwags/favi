@@ -22,9 +22,6 @@ pub type uintmax_t = ::core::ffi::c_ulong;
 pub type avifBool = ::core::ffi::c_int;
 pub type avifPlanesFlags = u32;
 pub type avifHeaderFormatFlags = ::core::ffi::c_int;
-pub type avifColorPrimaries = u16;
-pub type avifTransferCharacteristics = u16;
-pub type avifMatrixCoefficients = u16;
 pub type avifTransformFlags = u32;
 pub type avifCodecFlags = u32;
 pub type avifIODestroyFunc = ::core::option::Option<unsafe extern "C" fn(io: *mut avifIO)>;
@@ -51,95 +48,95 @@ pub type avifImageContentTypeFlags = u32;
 pub type avifAddImageFlags = u32;
 #[repr(C)]
 #[repr(align(16))]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct max_align_t {
     pub __clang_max_align_nonce1: ::core::ffi::c_longlong,
     pub __bindgen_padding_0: u64,
     pub __clang_max_align_nonce2: u128,
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifPlanesFlag(pub ::core::ffi::c_uint);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifChannelIndex(pub ::core::ffi::c_uint);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifResult(pub ::core::ffi::c_uint);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifHeaderFormat(pub ::core::ffi::c_uint);
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifROData {
     pub data: *const u8,
     pub size: usize,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifRWData {
     pub data: *mut u8,
     pub size: usize,
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifPixelFormat(pub ::core::ffi::c_uint);
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifPixelFormatInfo {
     pub monochrome: avifBool,
     pub chromaShiftX: ::core::ffi::c_int,
     pub chromaShiftY: ::core::ffi::c_int,
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifChromaSamplePosition(pub ::core::ffi::c_uint);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifRange(pub ::core::ffi::c_uint);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub struct _bindgen_ty_1(pub ::core::ffi::c_uint);
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
+pub struct avifColorPrimaries(pub u16);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub struct _bindgen_ty_2(pub ::core::ffi::c_uint);
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
+pub struct avifTransferCharacteristics(pub u16);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
-pub struct _bindgen_ty_3(pub ::core::ffi::c_uint);
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
+pub struct avifMatrixCoefficients(pub u16);
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifDiagnostics {
     pub error: [::core::ffi::c_char; 256usize],
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifFraction {
     pub n: i32,
     pub d: i32,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifSignedFraction {
     pub n: i32,
     pub d: u32,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifUnsignedFraction {
     pub n: u32,
     pub d: u32,
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifTransformFlag(pub ::core::ffi::c_uint);
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifPixelAspectRatioBox {
     pub hSpacing: u32,
     pub vSpacing: u32,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifCleanApertureBox {
     pub widthN: u32,
     pub widthD: u32,
@@ -151,17 +148,17 @@ pub struct avifCleanApertureBox {
     pub vertOffD: u32,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifImageRotation {
     pub angle: u8,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifImageMirror {
     pub axis: u8,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifCropRect {
     pub x: u32,
     pub y: u32,
@@ -169,13 +166,13 @@ pub struct avifCropRect {
     pub height: u32,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifContentLightLevelInformationBox {
     pub maxCLL: u16,
     pub maxPALL: u16,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifGainMap {
     pub image: *mut avifImage,
     pub gainMapMin: [avifSignedFraction; 3usize],
@@ -196,17 +193,17 @@ pub struct avifGainMap {
     pub altCLLI: avifContentLightLevelInformationBox,
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifSampleTransformRecipe(pub ::core::ffi::c_uint);
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifImageItemProperty {
     pub boxtype: [u8; 4usize],
     pub usertype: [u8; 16usize],
     pub boxPayload: avifRWData,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifImage {
     pub width: u32,
     pub height: u32,
@@ -238,16 +235,16 @@ pub struct avifImage {
     pub gainMap: *mut avifGainMap,
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifRGBFormat(pub ::core::ffi::c_uint);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifChromaUpsampling(pub ::core::ffi::c_uint);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifChromaDownsampling(pub ::core::ffi::c_uint);
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifRGBImage {
     pub width: u32,
     pub height: u32,
@@ -264,13 +261,13 @@ pub struct avifRGBImage {
     pub rowBytes: u32,
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifCodecChoice(pub ::core::ffi::c_uint);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifCodecFlag(pub ::core::ffi::c_uint);
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifIO {
     pub destroy: avifIODestroyFunc,
     pub read: avifIOReadFunc,
@@ -280,24 +277,24 @@ pub struct avifIO {
     pub data: *mut ::core::ffi::c_void,
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifStrictFlag(pub ::core::ffi::c_uint);
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifIOStats {
     pub colorOBUSize: usize,
     pub alphaOBUSize: usize,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifDecoderData {
     _unused: [u8; 0],
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifDecoderSource(pub ::core::ffi::c_uint);
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialOrd, PartialEq)]
 pub struct avifImageTiming {
     pub timescale: u64,
     pub pts: f64,
@@ -306,13 +303,13 @@ pub struct avifImageTiming {
     pub durationInTimescales: u64,
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifProgressiveState(pub ::core::ffi::c_uint);
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifImageContentTypeFlag(pub ::core::ffi::c_uint);
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifDecoder {
     pub codecChoice: avifCodecChoice,
     pub maxThreads: ::core::ffi::c_int,
@@ -343,29 +340,29 @@ pub struct avifDecoder {
     pub imageContentToDecode: avifImageContentTypeFlags,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifExtent {
     pub offset: u64,
     pub size: usize,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifEncoderData {
     _unused: [u8; 0],
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifCodecSpecificOptions {
     _unused: [u8; 0],
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, Hash, PartialOrd, Ord, PartialEq, Eq)]
 pub struct avifScalingMode {
     pub horizontal: avifFraction,
     pub vertical: avifFraction,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug)]
 pub struct avifEncoder {
     pub codecChoice: avifCodecChoice,
     pub maxThreads: ::core::ffi::c_int,
@@ -395,7 +392,7 @@ pub struct avifEncoder {
     pub sampleTransformRecipe: avifSampleTransformRecipe,
 }
 #[repr(transparent)]
-#[derive(Debug, Copy, Clone, Hash, PartialEq, Eq)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Copy, PartialOrd, Ord)]
 pub struct avifAddImageFlag(pub ::core::ffi::c_uint);
 pub const AVIF_VERSION_MAJOR: u32 = 1;
 pub const AVIF_VERSION_MINOR: u32 = 4;
@@ -456,59 +453,80 @@ const _: () = {
     ["Offset of field: avifPixelFormatInfo::chromaShiftY"]
         [::core::mem::offset_of!(avifPixelFormatInfo, chromaShiftY) - 8usize];
 };
-pub const AVIF_COLOR_PRIMARIES_UNKNOWN: _bindgen_ty_1 = _bindgen_ty_1(0);
-pub const AVIF_COLOR_PRIMARIES_BT709: _bindgen_ty_1 = _bindgen_ty_1(1);
-pub const AVIF_COLOR_PRIMARIES_SRGB: _bindgen_ty_1 = _bindgen_ty_1(1);
-pub const AVIF_COLOR_PRIMARIES_IEC61966_2_4: _bindgen_ty_1 = _bindgen_ty_1(1);
-pub const AVIF_COLOR_PRIMARIES_UNSPECIFIED: _bindgen_ty_1 = _bindgen_ty_1(2);
-pub const AVIF_COLOR_PRIMARIES_BT470M: _bindgen_ty_1 = _bindgen_ty_1(4);
-pub const AVIF_COLOR_PRIMARIES_BT470BG: _bindgen_ty_1 = _bindgen_ty_1(5);
-pub const AVIF_COLOR_PRIMARIES_BT601: _bindgen_ty_1 = _bindgen_ty_1(6);
-pub const AVIF_COLOR_PRIMARIES_SMPTE240: _bindgen_ty_1 = _bindgen_ty_1(7);
-pub const AVIF_COLOR_PRIMARIES_GENERIC_FILM: _bindgen_ty_1 = _bindgen_ty_1(8);
-pub const AVIF_COLOR_PRIMARIES_BT2020: _bindgen_ty_1 = _bindgen_ty_1(9);
-pub const AVIF_COLOR_PRIMARIES_BT2100: _bindgen_ty_1 = _bindgen_ty_1(9);
-pub const AVIF_COLOR_PRIMARIES_XYZ: _bindgen_ty_1 = _bindgen_ty_1(10);
-pub const AVIF_COLOR_PRIMARIES_SMPTE431: _bindgen_ty_1 = _bindgen_ty_1(11);
-pub const AVIF_COLOR_PRIMARIES_SMPTE432: _bindgen_ty_1 = _bindgen_ty_1(12);
-pub const AVIF_COLOR_PRIMARIES_DCI_P3: _bindgen_ty_1 = _bindgen_ty_1(12);
-pub const AVIF_COLOR_PRIMARIES_EBU3213: _bindgen_ty_1 = _bindgen_ty_1(22);
-pub const AVIF_TRANSFER_CHARACTERISTICS_UNKNOWN: _bindgen_ty_2 = _bindgen_ty_2(0);
-pub const AVIF_TRANSFER_CHARACTERISTICS_BT709: _bindgen_ty_2 = _bindgen_ty_2(1);
-pub const AVIF_TRANSFER_CHARACTERISTICS_UNSPECIFIED: _bindgen_ty_2 = _bindgen_ty_2(2);
-pub const AVIF_TRANSFER_CHARACTERISTICS_BT470M: _bindgen_ty_2 = _bindgen_ty_2(4);
-pub const AVIF_TRANSFER_CHARACTERISTICS_BT470BG: _bindgen_ty_2 = _bindgen_ty_2(5);
-pub const AVIF_TRANSFER_CHARACTERISTICS_BT601: _bindgen_ty_2 = _bindgen_ty_2(6);
-pub const AVIF_TRANSFER_CHARACTERISTICS_SMPTE240: _bindgen_ty_2 = _bindgen_ty_2(7);
-pub const AVIF_TRANSFER_CHARACTERISTICS_LINEAR: _bindgen_ty_2 = _bindgen_ty_2(8);
-pub const AVIF_TRANSFER_CHARACTERISTICS_LOG100: _bindgen_ty_2 = _bindgen_ty_2(9);
-pub const AVIF_TRANSFER_CHARACTERISTICS_LOG100_SQRT10: _bindgen_ty_2 = _bindgen_ty_2(10);
-pub const AVIF_TRANSFER_CHARACTERISTICS_IEC61966: _bindgen_ty_2 = _bindgen_ty_2(11);
-pub const AVIF_TRANSFER_CHARACTERISTICS_BT1361: _bindgen_ty_2 = _bindgen_ty_2(12);
-pub const AVIF_TRANSFER_CHARACTERISTICS_SRGB: _bindgen_ty_2 = _bindgen_ty_2(13);
-pub const AVIF_TRANSFER_CHARACTERISTICS_BT2020_10BIT: _bindgen_ty_2 = _bindgen_ty_2(14);
-pub const AVIF_TRANSFER_CHARACTERISTICS_BT2020_12BIT: _bindgen_ty_2 = _bindgen_ty_2(15);
-pub const AVIF_TRANSFER_CHARACTERISTICS_PQ: _bindgen_ty_2 = _bindgen_ty_2(16);
-pub const AVIF_TRANSFER_CHARACTERISTICS_SMPTE2084: _bindgen_ty_2 = _bindgen_ty_2(16);
-pub const AVIF_TRANSFER_CHARACTERISTICS_SMPTE428: _bindgen_ty_2 = _bindgen_ty_2(17);
-pub const AVIF_TRANSFER_CHARACTERISTICS_HLG: _bindgen_ty_2 = _bindgen_ty_2(18);
-pub const AVIF_MATRIX_COEFFICIENTS_IDENTITY: _bindgen_ty_3 = _bindgen_ty_3(0);
-pub const AVIF_MATRIX_COEFFICIENTS_BT709: _bindgen_ty_3 = _bindgen_ty_3(1);
-pub const AVIF_MATRIX_COEFFICIENTS_UNSPECIFIED: _bindgen_ty_3 = _bindgen_ty_3(2);
-pub const AVIF_MATRIX_COEFFICIENTS_FCC: _bindgen_ty_3 = _bindgen_ty_3(4);
-pub const AVIF_MATRIX_COEFFICIENTS_BT470BG: _bindgen_ty_3 = _bindgen_ty_3(5);
-pub const AVIF_MATRIX_COEFFICIENTS_BT601: _bindgen_ty_3 = _bindgen_ty_3(6);
-pub const AVIF_MATRIX_COEFFICIENTS_SMPTE240: _bindgen_ty_3 = _bindgen_ty_3(7);
-pub const AVIF_MATRIX_COEFFICIENTS_YCGCO: _bindgen_ty_3 = _bindgen_ty_3(8);
-pub const AVIF_MATRIX_COEFFICIENTS_BT2020_NCL: _bindgen_ty_3 = _bindgen_ty_3(9);
-pub const AVIF_MATRIX_COEFFICIENTS_BT2020_CL: _bindgen_ty_3 = _bindgen_ty_3(10);
-pub const AVIF_MATRIX_COEFFICIENTS_SMPTE2085: _bindgen_ty_3 = _bindgen_ty_3(11);
-pub const AVIF_MATRIX_COEFFICIENTS_CHROMA_DERIVED_NCL: _bindgen_ty_3 = _bindgen_ty_3(12);
-pub const AVIF_MATRIX_COEFFICIENTS_CHROMA_DERIVED_CL: _bindgen_ty_3 = _bindgen_ty_3(13);
-pub const AVIF_MATRIX_COEFFICIENTS_ICTCP: _bindgen_ty_3 = _bindgen_ty_3(14);
-pub const AVIF_MATRIX_COEFFICIENTS_YCGCO_RE: _bindgen_ty_3 = _bindgen_ty_3(16);
-pub const AVIF_MATRIX_COEFFICIENTS_YCGCO_RO: _bindgen_ty_3 = _bindgen_ty_3(17);
-pub const AVIF_MATRIX_COEFFICIENTS_LAST: _bindgen_ty_3 = _bindgen_ty_3(18);
+pub const AVIF_COLOR_PRIMARIES_UNKNOWN: avifColorPrimaries = avifColorPrimaries(0);
+pub const AVIF_COLOR_PRIMARIES_BT709: avifColorPrimaries = avifColorPrimaries(1);
+pub const AVIF_COLOR_PRIMARIES_SRGB: avifColorPrimaries = avifColorPrimaries(1);
+pub const AVIF_COLOR_PRIMARIES_IEC61966_2_4: avifColorPrimaries = avifColorPrimaries(1);
+pub const AVIF_COLOR_PRIMARIES_UNSPECIFIED: avifColorPrimaries = avifColorPrimaries(2);
+pub const AVIF_COLOR_PRIMARIES_BT470M: avifColorPrimaries = avifColorPrimaries(4);
+pub const AVIF_COLOR_PRIMARIES_BT470BG: avifColorPrimaries = avifColorPrimaries(5);
+pub const AVIF_COLOR_PRIMARIES_BT601: avifColorPrimaries = avifColorPrimaries(6);
+pub const AVIF_COLOR_PRIMARIES_SMPTE240: avifColorPrimaries = avifColorPrimaries(7);
+pub const AVIF_COLOR_PRIMARIES_GENERIC_FILM: avifColorPrimaries = avifColorPrimaries(8);
+pub const AVIF_COLOR_PRIMARIES_BT2020: avifColorPrimaries = avifColorPrimaries(9);
+pub const AVIF_COLOR_PRIMARIES_BT2100: avifColorPrimaries = avifColorPrimaries(9);
+pub const AVIF_COLOR_PRIMARIES_XYZ: avifColorPrimaries = avifColorPrimaries(10);
+pub const AVIF_COLOR_PRIMARIES_SMPTE431: avifColorPrimaries = avifColorPrimaries(11);
+pub const AVIF_COLOR_PRIMARIES_SMPTE432: avifColorPrimaries = avifColorPrimaries(12);
+pub const AVIF_COLOR_PRIMARIES_DCI_P3: avifColorPrimaries = avifColorPrimaries(12);
+pub const AVIF_COLOR_PRIMARIES_EBU3213: avifColorPrimaries = avifColorPrimaries(22);
+pub const AVIF_TRANSFER_CHARACTERISTICS_UNKNOWN: avifTransferCharacteristics =
+    avifTransferCharacteristics(0);
+pub const AVIF_TRANSFER_CHARACTERISTICS_BT709: avifTransferCharacteristics =
+    avifTransferCharacteristics(1);
+pub const AVIF_TRANSFER_CHARACTERISTICS_UNSPECIFIED: avifTransferCharacteristics =
+    avifTransferCharacteristics(2);
+pub const AVIF_TRANSFER_CHARACTERISTICS_BT470M: avifTransferCharacteristics =
+    avifTransferCharacteristics(4);
+pub const AVIF_TRANSFER_CHARACTERISTICS_BT470BG: avifTransferCharacteristics =
+    avifTransferCharacteristics(5);
+pub const AVIF_TRANSFER_CHARACTERISTICS_BT601: avifTransferCharacteristics =
+    avifTransferCharacteristics(6);
+pub const AVIF_TRANSFER_CHARACTERISTICS_SMPTE240: avifTransferCharacteristics =
+    avifTransferCharacteristics(7);
+pub const AVIF_TRANSFER_CHARACTERISTICS_LINEAR: avifTransferCharacteristics =
+    avifTransferCharacteristics(8);
+pub const AVIF_TRANSFER_CHARACTERISTICS_LOG100: avifTransferCharacteristics =
+    avifTransferCharacteristics(9);
+pub const AVIF_TRANSFER_CHARACTERISTICS_LOG100_SQRT10: avifTransferCharacteristics =
+    avifTransferCharacteristics(10);
+pub const AVIF_TRANSFER_CHARACTERISTICS_IEC61966: avifTransferCharacteristics =
+    avifTransferCharacteristics(11);
+pub const AVIF_TRANSFER_CHARACTERISTICS_BT1361: avifTransferCharacteristics =
+    avifTransferCharacteristics(12);
+pub const AVIF_TRANSFER_CHARACTERISTICS_SRGB: avifTransferCharacteristics =
+    avifTransferCharacteristics(13);
+pub const AVIF_TRANSFER_CHARACTERISTICS_BT2020_10BIT: avifTransferCharacteristics =
+    avifTransferCharacteristics(14);
+pub const AVIF_TRANSFER_CHARACTERISTICS_BT2020_12BIT: avifTransferCharacteristics =
+    avifTransferCharacteristics(15);
+pub const AVIF_TRANSFER_CHARACTERISTICS_PQ: avifTransferCharacteristics =
+    avifTransferCharacteristics(16);
+pub const AVIF_TRANSFER_CHARACTERISTICS_SMPTE2084: avifTransferCharacteristics =
+    avifTransferCharacteristics(16);
+pub const AVIF_TRANSFER_CHARACTERISTICS_SMPTE428: avifTransferCharacteristics =
+    avifTransferCharacteristics(17);
+pub const AVIF_TRANSFER_CHARACTERISTICS_HLG: avifTransferCharacteristics =
+    avifTransferCharacteristics(18);
+pub const AVIF_MATRIX_COEFFICIENTS_IDENTITY: avifMatrixCoefficients = avifMatrixCoefficients(0);
+pub const AVIF_MATRIX_COEFFICIENTS_BT709: avifMatrixCoefficients = avifMatrixCoefficients(1);
+pub const AVIF_MATRIX_COEFFICIENTS_UNSPECIFIED: avifMatrixCoefficients = avifMatrixCoefficients(2);
+pub const AVIF_MATRIX_COEFFICIENTS_FCC: avifMatrixCoefficients = avifMatrixCoefficients(4);
+pub const AVIF_MATRIX_COEFFICIENTS_BT470BG: avifMatrixCoefficients = avifMatrixCoefficients(5);
+pub const AVIF_MATRIX_COEFFICIENTS_BT601: avifMatrixCoefficients = avifMatrixCoefficients(6);
+pub const AVIF_MATRIX_COEFFICIENTS_SMPTE240: avifMatrixCoefficients = avifMatrixCoefficients(7);
+pub const AVIF_MATRIX_COEFFICIENTS_YCGCO: avifMatrixCoefficients = avifMatrixCoefficients(8);
+pub const AVIF_MATRIX_COEFFICIENTS_BT2020_NCL: avifMatrixCoefficients = avifMatrixCoefficients(9);
+pub const AVIF_MATRIX_COEFFICIENTS_BT2020_CL: avifMatrixCoefficients = avifMatrixCoefficients(10);
+pub const AVIF_MATRIX_COEFFICIENTS_SMPTE2085: avifMatrixCoefficients = avifMatrixCoefficients(11);
+pub const AVIF_MATRIX_COEFFICIENTS_CHROMA_DERIVED_NCL: avifMatrixCoefficients =
+    avifMatrixCoefficients(12);
+pub const AVIF_MATRIX_COEFFICIENTS_CHROMA_DERIVED_CL: avifMatrixCoefficients =
+    avifMatrixCoefficients(13);
+pub const AVIF_MATRIX_COEFFICIENTS_ICTCP: avifMatrixCoefficients = avifMatrixCoefficients(14);
+pub const AVIF_MATRIX_COEFFICIENTS_YCGCO_RE: avifMatrixCoefficients = avifMatrixCoefficients(16);
+pub const AVIF_MATRIX_COEFFICIENTS_YCGCO_RO: avifMatrixCoefficients = avifMatrixCoefficients(17);
+pub const AVIF_MATRIX_COEFFICIENTS_LAST: avifMatrixCoefficients = avifMatrixCoefficients(18);
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
     ["Size of avifDiagnostics"][::core::mem::size_of::<avifDiagnostics>() - 256usize];
