@@ -1,7 +1,7 @@
 use std::{ffi::CStr, fs};
 
 use anyhow::bail;
-use favi::{Encoder, Image, sys};
+use favi::{AddImageFlags, Encoder, Image, sys};
 
 fn main() -> anyhow::Result<()> {
     let version = favi::version().to_string_lossy();
@@ -33,7 +33,7 @@ fn main() -> anyhow::Result<()> {
 
         encoder.set_quality(30).set_max_threads(24).set_speed(7);
 
-        encoder.add_image(&image, 1, 2)?;
+        encoder.add_image(&image, 1, AddImageFlags::Single)?;
 
         let output = encoder.finish()?;
 

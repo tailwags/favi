@@ -45,6 +45,14 @@ pub fn version() -> &'static CStr {
     unsafe { CStr::from_ptr(sys::avifVersion()) }
 }
 
+bitflags::bitflags! {
+    pub struct AddImageFlags: sys::avifAddImageFlags {
+        const None = sys::avifAddImageFlag::AVIF_ADD_IMAGE_FLAG_NONE.0;
+        const ForceKeyframe = sys::avifAddImageFlag::AVIF_ADD_IMAGE_FLAG_FORCE_KEYFRAME.0;
+        const Single = sys::avifAddImageFlag::AVIF_ADD_IMAGE_FLAG_SINGLE.0;
+    }
+}
+
 #[repr(transparent)]
 pub struct Image {
     raw: NonNull<sys::avifImage>,
@@ -165,14 +173,14 @@ impl Encoder {
         &mut self,
         image: &Image,
         duration_in_timescales: u64,
-        flags: u32,
+        flags: AddImageFlags,
     ) -> Result<(), Error> {
         let result = unsafe {
             sys::avifEncoderAddImage(
                 self.raw.as_ptr(),
                 image.as_raw(),
                 duration_in_timescales,
-                flags,
+                flags.bits(),
             )
         };
 

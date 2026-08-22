@@ -12,6 +12,10 @@ codegen-units = 1
 strip = true
 
 [dependencies]
+bitflags = "2.13.1"
+
+[dev-dependencies]
+anyhow = "1.0.104"
 
 [build-dependencies]
 cmake = "0.1.58"
