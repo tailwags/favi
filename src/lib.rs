@@ -141,6 +141,26 @@ impl Encoder {
         unsafe { (*self.raw.as_ptr()).quality }
     }
 
+    pub fn encode(self, image: &Image) -> Result<Data, Error> {
+        let mut output = sys::avifRWData {
+            data: null_mut(),
+            size: 0,
+        };
+
+        let result =
+            unsafe { sys::avifEncoderWrite(self.raw.as_ptr(), image.as_raw(), &mut output) };
+
+        if result != sys::avifResult::AVIF_RESULT_OK {
+            return Err(result.into());
+        }
+
+        if output.data.is_null() {
+            return Err(Error::Esther);
+        }
+
+        Ok(Data { raw: output })
+    }
+
     pub fn add_image(
         &mut self,
         image: &Image,
