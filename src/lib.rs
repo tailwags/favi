@@ -82,6 +82,12 @@ impl Image {
     }
 }
 
+impl Drop for Image {
+    fn drop(&mut self) {
+        unsafe { sys::avifImageDestroy(self.raw.as_ptr()) }
+    }
+}
+
 #[repr(transparent)]
 pub struct Encoder {
     raw: NonNull<sys::avifEncoder>,
@@ -150,23 +156,20 @@ impl Encoder {
     }
 
     pub fn encode(self, image: &Image) -> Result<Data, Error> {
-        let mut output = sys::avifRWData {
-            data: null_mut(),
-            size: 0,
-        };
+        let mut output = Data::new();
 
         let result =
-            unsafe { sys::avifEncoderWrite(self.raw.as_ptr(), image.as_raw(), &mut output) };
+            unsafe { sys::avifEncoderWrite(self.raw.as_ptr(), image.as_raw(), output.as_raw()) };
 
         if result != sys::avifResult::AVIF_RESULT_OK {
             return Err(result.into());
         }
 
-        if output.data.is_null() {
+        if output.as_raw().data.is_null() {
             return Err(Error::Esther);
         }
 
-        Ok(Data { raw: output })
+        Ok(output)
     }
 
     pub fn add_image(
@@ -192,22 +195,19 @@ impl Encoder {
     }
 
     pub fn finish(self) -> Result<Data, Error> {
-        let mut output = sys::avifRWData {
-            data: null_mut(),
-            size: 0,
-        };
+        let mut output = Data::new();
 
-        let result = unsafe { sys::avifEncoderFinish(self.raw.as_ptr(), &mut output) };
+        let result = unsafe { sys::avifEncoderFinish(self.raw.as_ptr(), output.as_raw()) };
 
         if result != sys::avifResult::AVIF_RESULT_OK {
             return Err(result.into());
         }
 
-        if output.data.is_null() {
+        if output.as_raw().data.is_null() {
             return Err(Error::Esther);
         }
 
-        Ok(Data { raw: output })
+        Ok(output)
     }
 }
 
@@ -217,11 +217,25 @@ impl Drop for Encoder {
     }
 }
 
+#[repr(transparent)]
 pub struct Data {
     pub(crate) raw: sys::avifRWData,
 }
 
 impl Data {
+    pub(crate) fn new() -> Self {
+        Self {
+            raw: sys::avifRWData {
+                data: null_mut(),
+                size: 0,
+            },
+        }
+    }
+
+    pub(crate) fn as_raw(&mut self) -> &mut sys::avifRWData {
+        &mut self.raw
+    }
+
     #[inline]
     pub const fn as_slice(&self) -> &[u8] {
         unsafe { slice::from_raw_parts(self.raw.data, self.raw.size) }
