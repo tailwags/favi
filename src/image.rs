@@ -1,4 +1,4 @@
-use std::{num::NonZero, ptr::NonNull};
+use std::{mem::MaybeUninit, num::NonZero, ptr::NonNull, slice};
 
 use crate::{
     Error::{self, AllocationFailed},
@@ -69,10 +69,81 @@ impl Image {
     pub const fn as_raw_mut(&mut self) -> *mut sys::avifImage {
         self.raw.as_ptr()
     }
+
+    #[inline]
+    pub fn width(&self) -> u32 {
+        unsafe { (*self.raw.as_ptr()).width }
+    }
+
+    #[inline]
+    pub fn height(&self) -> u32 {
+        unsafe { (*self.raw.as_ptr()).height }
+    }
+
+    pub fn to_rgb(&self, depth: u32, format: RgbFormat) -> Result<RgbImage> {
+        RgbImage::from_image(self, depth, format)
+    }
 }
 
 impl Drop for Image {
     fn drop(&mut self) {
         unsafe { sys::avifImageDestroy(self.raw.as_ptr()) }
+    }
+}
+
+#[repr(u32)]
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum RgbFormat {
+    Rgb = sys::avifRGBFormat::AVIF_RGB_FORMAT_RGB.0,
+    Rgba = sys::avifRGBFormat::AVIF_RGB_FORMAT_RGBA.0,
+    Argb = sys::avifRGBFormat::AVIF_RGB_FORMAT_ARGB.0,
+    Bgr = sys::avifRGBFormat::AVIF_RGB_FORMAT_BGR.0,
+    Bgra = sys::avifRGBFormat::AVIF_RGB_FORMAT_BGRA.0,
+    Abgr = sys::avifRGBFormat::AVIF_RGB_FORMAT_ABGR.0,
+    Rgb565 = sys::avifRGBFormat::AVIF_RGB_FORMAT_RGB_565.0,
+    Gray = sys::avifRGBFormat::AVIF_RGB_FORMAT_GRAY.0,
+    GrayA = sys::avifRGBFormat::AVIF_RGB_FORMAT_GRAYA.0,
+    AGray = sys::avifRGBFormat::AVIF_RGB_FORMAT_AGRAY.0,
+}
+
+pub struct RgbImage {
+    raw: sys::avifRGBImage,
+}
+
+impl RgbImage {
+    fn from_image(image: &Image, depth: u32, format: RgbFormat) -> Result<Self> {
+        let mut raw = MaybeUninit::zeroed();
+
+        unsafe {
+            sys::avifRGBImageSetDefaults(raw.as_mut_ptr(), image.as_raw());
+        }
+
+        let mut raw = unsafe { raw.assume_init() };
+        raw.depth = depth;
+        raw.format = sys::avifRGBFormat(format as _);
+
+        unsafe {
+            sys::avifRGBImageAllocatePixels(&mut raw).check()?;
+
+            sys::avifImageYUVToRGB(image.as_raw(), &mut raw).check()?;
+        }
+
+        Ok(Self { raw })
+    }
+
+    pub fn pixels(&self) -> &[u8] {
+        unsafe {
+            slice::from_raw_parts(
+                self.raw.pixels,
+                (self.raw.rowBytes * self.raw.height) as usize,
+            )
+        }
+    }
+}
+
+impl Drop for RgbImage {
+    fn drop(&mut self) {
+        unsafe { sys::avifRGBImageFreePixels(&mut self.raw) }
     }
 }
