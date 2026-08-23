@@ -10,7 +10,7 @@ mod image;
 pub mod sys;
 
 pub use data::*;
-// pub use decoder::*;
+pub use decoder::*;
 pub use encoder::*;
 pub use error::*;
 pub use image::*;
