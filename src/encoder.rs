@@ -19,7 +19,7 @@ impl Encoder {
     pub fn new() -> Result<Self> {
         let encoder: Option<Self> = unsafe { std::mem::transmute(sys::avifEncoderCreate()) };
 
-        encoder.ok_or(Error::Esther)
+        encoder.ok_or(Error::AllocationFailed)
     }
 
     #[inline]
@@ -88,7 +88,7 @@ impl Encoder {
         }
 
         if output.as_raw().data.is_null() {
-            return Err(Error::Esther);
+            return Err(Error::EmptyOutput);
         }
 
         Ok(output)
@@ -126,7 +126,7 @@ impl Encoder {
         }
 
         if output.as_raw().data.is_null() {
-            return Err(Error::Esther);
+            return Err(Error::EmptyOutput);
         }
 
         Ok(output)

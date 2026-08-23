@@ -11,7 +11,7 @@ impl Image {
     pub fn empty() -> Result<Self> {
         let image: Option<Self> = unsafe { std::mem::transmute(sys::avifImageCreateEmpty()) };
 
-        image.ok_or(Error::Esther)
+        image.ok_or(Error::AllocationFailed)
     }
 
     pub const unsafe fn from_raw(raw: *mut sys::avifImage) -> Self {
