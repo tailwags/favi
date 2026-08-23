@@ -22,13 +22,6 @@ pub fn version() -> &'static CStr {
     unsafe { CStr::from_ptr(sys::avifVersion()) }
 }
 
-// /// Returns the name of a pixel format, e.g. `"YUV420"`.
-// pub fn pixel_format_to_string(format: sys::avifPixelFormat) -> &'static CStr {
-//     // SAFETY: avifPixelFormatToString returns a static string literal on
-//     // every path, defaulting to "Unknown"; never null.
-//     unsafe { CStr::from_ptr(sys::avifPixelFormatToString(format)) }
-// }
-
 // /// Returns the name of a progressive decoding state, e.g. `"Active"`.
 // pub fn progressive_state_to_string(state: sys::avifProgressiveState) -> &'static CStr {
 //     // SAFETY: avifProgressiveStateToString returns a static string literal on
