@@ -162,15 +162,15 @@ fn main() {
     // driver and does not add the C++ runtime on its own, so link it
     // explicitly here. MSVC needs nothing (its archives carry /DEFAULTLIB
     // directives, and there is no `stdc++` library to link there).
-    if dep_mode("libgav1") != "OFF" || dep_mode("avm") != "OFF" || dep_mode("libyuv") == "SYSTEM" {
-        if env::var("CARGO_CFG_TARGET_ENV").as_deref() != Ok("msvc") {
-            let cxx = match env::var("CARGO_CFG_TARGET_OS").as_deref() {
-                Ok("macos") | Ok("ios") | Ok("tvos") | Ok("watchos") | Ok("visionos") => "c++",
-                Ok("android") => "c++_shared",
-                _ => "stdc++",
-            };
-            println!("cargo:rustc-link-lib={cxx}");
-        }
+    if (dep_mode("libgav1") != "OFF" || dep_mode("avm") != "OFF" || dep_mode("libyuv") == "SYSTEM")
+        && env::var("CARGO_CFG_TARGET_ENV").as_deref() != Ok("msvc")
+    {
+        let cxx = match env::var("CARGO_CFG_TARGET_OS").as_deref() {
+            Ok("macos") | Ok("ios") | Ok("tvos") | Ok("watchos") | Ok("visionos") => "c++",
+            Ok("android") => "c++_shared",
+            _ => "stdc++",
+        };
+        println!("cargo:rustc-link-lib={cxx}");
     }
 
     // Re-run if the libavif sources or this script change.
