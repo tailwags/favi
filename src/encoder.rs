@@ -80,12 +80,8 @@ impl Encoder {
     pub fn encode(self, image: &Image) -> Result<Data> {
         let mut output = Data::new();
 
-        let result =
-            unsafe { sys::avifEncoderWrite(self.raw.as_ptr(), image.as_raw(), output.as_raw()) };
-
-        if result != sys::avifResult::AVIF_RESULT_OK {
-            return Err(result.into());
-        }
+        unsafe { sys::avifEncoderWrite(self.raw.as_ptr(), image.as_raw(), output.as_raw()) }
+            .check()?;
 
         if output.as_raw().data.is_null() {
             return Err(Error::EmptyOutput);
@@ -100,30 +96,21 @@ impl Encoder {
         duration_in_timescales: u64,
         flags: AddImageFlags,
     ) -> Result<()> {
-        let result = unsafe {
+        unsafe {
             sys::avifEncoderAddImage(
                 self.raw.as_ptr(),
                 image.as_raw(),
                 duration_in_timescales,
                 flags.bits(),
             )
-        };
-
-        if result != sys::avifResult::AVIF_RESULT_OK {
-            return Err(result.into());
         }
-
-        Ok(())
+        .check()
     }
 
     pub fn finish(self) -> Result<Data> {
         let mut output = Data::new();
 
-        let result = unsafe { sys::avifEncoderFinish(self.raw.as_ptr(), output.as_raw()) };
-
-        if result != sys::avifResult::AVIF_RESULT_OK {
-            return Err(result.into());
-        }
+        unsafe { sys::avifEncoderFinish(self.raw.as_ptr(), output.as_raw()) }.check()?;
 
         if output.as_raw().data.is_null() {
             return Err(Error::EmptyOutput);

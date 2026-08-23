@@ -28,13 +28,18 @@ impl fmt::Display for Error {
     }
 }
 
-impl From<sys::avifResult> for Error {
-    fn from(result: sys::avifResult) -> Self {
-        Self::Code(result)
-    }
-}
-
 #[inline]
 pub(crate) fn result_to_str(result: sys::avifResult) -> Cow<'static, str> {
     unsafe { CStr::from_ptr(sys::avifResultToString(result)) }.to_string_lossy()
+}
+
+impl sys::avifResult {
+    #[inline]
+    pub fn check(self) -> Result<(), Error> {
+        if self != sys::avifResult::AVIF_RESULT_OK {
+            return Err(Error::Code(self));
+        }
+
+        Ok(())
+    }
 }
