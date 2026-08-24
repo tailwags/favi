@@ -1,4 +1,10 @@
-use std::{mem::MaybeUninit, ptr::NonNull, slice};
+use std::{
+    marker::PhantomData,
+    mem::{ManuallyDrop, MaybeUninit},
+    ops::Deref,
+    ptr::NonNull,
+    slice,
+};
 
 use crate::{
     Error::{self, AllocationFailed},
@@ -19,6 +25,16 @@ impl BitDepth {
     #[inline]
     pub const fn bits(self) -> u32 {
         self as u32
+    }
+
+    /// The number of bytes per channel sample in an RGB pixel buffer at this
+    /// depth: 1 for 8-bit, and 2 for 10/12/16-bit.
+    #[inline]
+    pub const fn bytes_per_channel(self) -> u32 {
+        match self {
+            Self::B8 => 1,
+            Self::B10 | Self::B12 | Self::B16 => 2,
+        }
     }
 }
 
@@ -149,6 +165,21 @@ pub enum RgbFormat {
     AGray = sys::avifRGBFormat::AVIF_RGB_FORMAT_AGRAY.0,
 }
 
+impl RgbFormat {
+    /// The number of channels per pixel of this format (which is also the
+    /// number of bytes per pixel at 8-bit depth).
+    pub const fn channels(&self) -> u32 {
+        match self {
+            Self::Rgb | Self::Bgr => 3,
+            Self::Rgba | Self::Argb | Self::Bgra | Self::Abgr => 4,
+            Self::Rgb565 => 2,
+            Self::Gray => 1,
+            Self::GrayA | Self::AGray => 2,
+        }
+    }
+}
+
+#[repr(transparent)]
 pub struct RgbImage {
     raw: sys::avifRGBImage,
 }
@@ -207,5 +238,94 @@ impl RgbImage {
 impl Drop for RgbImage {
     fn drop(&mut self) {
         unsafe { sys::avifRGBImageFreePixels(&mut self.raw) }
+    }
+}
+
+/// An [`RgbImage`] whose pixel buffer is owned by the caller rather than
+/// allocated by libavif.
+#[repr(transparent)]
+pub struct BorrowedRgbImage<'b> {
+    image: ManuallyDrop<RgbImage>,
+    _phantom: PhantomData<&'b [u8]>,
+}
+
+impl<'b> BorrowedRgbImage<'b> {
+    /// Creates a borrowed RGB image over the caller-owned `pixels` buffer.
+    ///
+    /// The buffer must contain at least
+    /// `format.channels() * depth.bytes_per_channel() * width * height`
+    /// bytes, tightly packed with no padding between rows. For depths above
+    /// 8 bits, each channel sample occupies 2 bytes and the buffer must be
+    /// 2-byte aligned.
+    ///
+    /// The pixel contents are not validated: it is up to the caller to
+    /// provide data that is actually in the declared `format`.
+    ///
+    /// `RgbFormat::Rgb565` can be produced by YUV→RGB conversion but not
+    /// consumed by RGB→YUV conversion: [`Image::from_rgb`] always fails for
+    /// such an image.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`Error::BufferTooSmall`] if `pixels` does not contain enough
+    /// bytes for the declared dimensions, [`Error::MisalignedBuffer`] if the
+    /// depth is above 8 bits and the buffer is not 2-byte aligned, and
+    /// [`Error::SizeOverflow`] if computing the required size overflows.
+    pub fn new(
+        width: u32,
+        height: u32,
+        depth: BitDepth,
+        format: RgbFormat,
+        pixels: &'b [u8],
+    ) -> Result<Self> {
+        // Samples above 8-bit depth are read as 16-bit values, so the
+        // buffer must be 2-byte aligned for those formats.
+        if depth != BitDepth::B8 && pixels.as_ptr().align_offset(2) != 0 {
+            return Err(Error::MisalignedBuffer { required: 2 });
+        }
+
+        let row_bytes = format
+            .channels()
+            .checked_mul(depth.bytes_per_channel())
+            .and_then(|bytes_per_pixel| bytes_per_pixel.checked_mul(width))
+            .ok_or(Error::SizeOverflow)?;
+
+        let required = row_bytes.checked_mul(height).ok_or(Error::SizeOverflow)?;
+
+        if pixels.len() < required as usize {
+            return Err(Error::BufferTooSmall {
+                required: required as usize,
+                len: pixels.len(),
+            });
+        }
+
+        let raw = sys::avifRGBImage {
+            width,
+            height,
+            depth: depth.bits(),
+            format: sys::avifRGBFormat(format as _),
+            chromaUpsampling: sys::avifChromaUpsampling::AVIF_CHROMA_UPSAMPLING_AUTOMATIC,
+            chromaDownsampling: sys::avifChromaDownsampling::AVIF_CHROMA_DOWNSAMPLING_AUTOMATIC,
+            avoidLibYUV: sys::AVIF_FALSE as _,
+            ignoreAlpha: sys::AVIF_FALSE as _,
+            alphaPremultiplied: sys::AVIF_FALSE as _,
+            isFloat: sys::AVIF_FALSE as _,
+            maxThreads: 1,
+            pixels: pixels.as_ptr().cast_mut(),
+            rowBytes: row_bytes,
+        };
+
+        Ok(Self {
+            image: ManuallyDrop::new(RgbImage { raw }),
+            _phantom: PhantomData,
+        })
+    }
+}
+
+impl<'b> Deref for BorrowedRgbImage<'b> {
+    type Target = RgbImage;
+
+    fn deref(&self) -> &Self::Target {
+        self.image.deref()
     }
 }

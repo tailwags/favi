@@ -15,6 +15,14 @@ pub enum Error {
     /// The image's bit depth was not one of the four depths libavif
     /// supports (8, 10, 12, or 16).
     InvalidDepth(u32),
+    /// The caller-provided pixel buffer was too small for the declared
+    /// image dimensions.
+    BufferTooSmall { required: usize, len: usize },
+    /// The caller-provided pixel buffer was not aligned as libavif requires.
+    MisalignedBuffer { required: usize },
+    /// Computing the size required to hold the declared image dimensions
+    /// overflowed.
+    SizeOverflow,
 }
 
 impl std::error::Error for Error {}
@@ -30,6 +38,16 @@ impl fmt::Display for Error {
             Error::InvalidDepth(depth) => write!(
                 f,
                 "image bit depth of {depth} is not supported; expected 8, 10, 12, or 16"
+            ),
+            Error::BufferTooSmall { required, len } => write!(
+                f,
+                "pixel buffer of {len} bytes is too small; {required} bytes are required"
+            ),
+            Error::MisalignedBuffer { required } => {
+                write!(f, "pixel buffer is not {required}-byte aligned")
+            }
+            Error::SizeOverflow => f.write_str(
+                "required pixel buffer size for the declared image dimensions overflowed",
             ),
         }
     }
