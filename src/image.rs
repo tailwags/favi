@@ -1,4 +1,4 @@
-use std::{mem::MaybeUninit, num::NonZero, ptr::NonNull, slice};
+use std::{mem::MaybeUninit, ptr::NonNull, slice};
 
 use crate::{
     Error::{self, AllocationFailed},
@@ -60,16 +60,11 @@ impl Image {
         image.ok_or(Error::AllocationFailed)
     }
 
-    pub fn new(
-        width: NonZero<u32>,
-        height: NonZero<u32>,
-        depth: BitDepth,
-        format: PixelFormat,
-    ) -> Result<Self> {
+    pub fn new(width: u32, height: u32, depth: BitDepth, format: PixelFormat) -> Result<Self> {
         let image: Option<Self> = unsafe {
             std::mem::transmute(sys::avifImageCreate(
-                width.get(),
-                height.get(),
+                width,
+                height,
                 depth.bits(),
                 sys::avifPixelFormat(format as _),
             ))
