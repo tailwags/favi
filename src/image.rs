@@ -121,6 +121,10 @@ impl Image {
     pub fn to_rgb(&self, depth: BitDepth, format: RgbFormat) -> Result<RgbImage> {
         RgbImage::from_image(self, depth, format)
     }
+
+    pub fn from_rgb(rgb: &RgbImage, depth: BitDepth, format: PixelFormat) -> Result<Self> {
+        rgb.to_image(depth, format)
+    }
 }
 
 impl Drop for Image {
@@ -150,7 +154,7 @@ pub struct RgbImage {
 }
 
 impl RgbImage {
-    fn from_image(image: &Image, depth: BitDepth, format: RgbFormat) -> Result<Self> {
+    pub fn from_image(image: &Image, depth: BitDepth, format: RgbFormat) -> Result<Self> {
         let mut raw = MaybeUninit::zeroed();
 
         unsafe {
@@ -169,6 +173,17 @@ impl RgbImage {
 
         Ok(Self { raw })
     }
+
+    pub fn to_image(&self, depth: BitDepth, format: PixelFormat) -> Result<Image> {
+        let mut image = Image::new(self.width(), self.height(), depth, format)?;
+
+        unsafe {
+            sys::avifImageRGBToYUV(image.as_raw_mut(), &self.raw).check()?;
+        }
+
+        Ok(image)
+    }
+
     #[inline]
     pub const fn width(&self) -> u32 {
         self.raw.width
