@@ -5,6 +5,38 @@ use crate::{
     Result, sys,
 };
 
+#[repr(u32)]
+#[non_exhaustive]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+pub enum BitDepth {
+    B8 = 8,
+    B10 = 10,
+    B12 = 12,
+    B16 = 16,
+}
+
+impl BitDepth {
+    #[inline]
+    pub const fn bits(self) -> u32 {
+        self as u32
+    }
+}
+
+impl TryFrom<u32> for BitDepth {
+    type Error = Error;
+
+    #[inline]
+    fn try_from(value: u32) -> Result<Self, Self::Error> {
+        match value {
+            8 => Ok(Self::B8),
+            10 => Ok(Self::B10),
+            12 => Ok(Self::B12),
+            16 => Ok(Self::B16),
+            other => Err(Error::InvalidDepth(other)),
+        }
+    }
+}
+
 #[repr(transparent)]
 pub struct Image {
     raw: NonNull<sys::avifImage>,
@@ -31,27 +63,19 @@ impl Image {
     pub fn new(
         width: NonZero<u32>,
         height: NonZero<u32>,
-        depth: u32,
+        depth: BitDepth,
         format: PixelFormat,
     ) -> Result<Self> {
         let image: Option<Self> = unsafe {
             std::mem::transmute(sys::avifImageCreate(
                 width.get(),
                 height.get(),
-                depth,
+                depth.bits(),
                 sys::avifPixelFormat(format as _),
             ))
         };
 
-        if let Some(image) = image {
-            return Ok(image);
-        }
-
-        if depth > 16 {
-            return Err(Error::InvalidDepth);
-        }
-
-        Err(AllocationFailed)
+        image.ok_or(AllocationFailed)
     }
 
     pub const unsafe fn from_raw(raw: *mut sys::avifImage) -> Self {
@@ -80,7 +104,26 @@ impl Image {
         unsafe { (*self.raw.as_ptr()).height }
     }
 
-    pub fn to_rgb(&self, depth: u32, format: RgbFormat) -> Result<RgbImage> {
+    /// The image's bit depth, if it is one of the depths libavif supports
+    /// (8, 10, 12, or 16).
+    ///
+    /// libavif only validates the bit depth of container metadata; the value
+    /// stored on a decoded image is whatever the underlying codec reported,
+    /// which may be non-standard. Use [`Self::raw_depth`] to read the depth
+    /// of such an image.
+    #[inline]
+    pub fn depth(&self) -> Result<BitDepth> {
+        self.raw_depth().try_into()
+    }
+
+    /// The image's bit depth exactly as reported by libavif, without
+    /// validation.
+    #[inline]
+    pub fn raw_depth(&self) -> u32 {
+        unsafe { (*self.raw.as_ptr()).depth }
+    }
+
+    pub fn to_rgb(&self, depth: BitDepth, format: RgbFormat) -> Result<RgbImage> {
         RgbImage::from_image(self, depth, format)
     }
 }
@@ -112,7 +155,7 @@ pub struct RgbImage {
 }
 
 impl RgbImage {
-    fn from_image(image: &Image, depth: u32, format: RgbFormat) -> Result<Self> {
+    fn from_image(image: &Image, depth: BitDepth, format: RgbFormat) -> Result<Self> {
         let mut raw = MaybeUninit::zeroed();
 
         unsafe {
@@ -120,7 +163,7 @@ impl RgbImage {
         }
 
         let mut raw = unsafe { raw.assume_init() };
-        raw.depth = depth;
+        raw.depth = depth.bits();
         raw.format = sys::avifRGBFormat(format as _);
 
         unsafe {

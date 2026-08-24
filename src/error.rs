@@ -12,8 +12,9 @@ pub enum Error {
     AllocationFailed,
     /// libavif reported success but produced no output data.
     EmptyOutput,
-    /// The provided depth was higher than 16; libavif only supports up to 16 bits per sample
-    InvalidDepth,
+    /// The image's bit depth was not one of the four depths libavif
+    /// supports (8, 10, 12, or 16).
+    InvalidDepth(u32),
 }
 
 impl std::error::Error for Error {}
@@ -26,7 +27,10 @@ impl fmt::Display for Error {
             Error::EmptyOutput => {
                 f.write_str("libavif reported success but produced no output data")
             }
-            Error::InvalidDepth => f.write_str("The provided depth was higher than 16; libavif only supports up to 16 bits per sample")
+            Error::InvalidDepth(depth) => write!(
+                f,
+                "image bit depth of {depth} is not supported; expected 8, 10, 12, or 16"
+            ),
         }
     }
 }
