@@ -179,6 +179,7 @@ fn main() -> Result<()> {
         })
         .prepend_enum_name(false)
         .sort_semantically(true)
+        .layout_tests(false)
         .header("libavif/include/avif/avif.h")
         .generate()
         .context("Failed to generate bindings")?
