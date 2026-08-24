@@ -180,6 +180,8 @@ fn main() -> Result<()> {
         .prepend_enum_name(false)
         .sort_semantically(true)
         .layout_tests(false)
+        .allowlist_item("avif.*")
+        .allowlist_item("AVIF.*")
         .header("libavif/include/avif/avif.h")
         .generate()
         .context("Failed to generate bindings")?
