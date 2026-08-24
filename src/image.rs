@@ -169,6 +169,15 @@ impl RgbImage {
 
         Ok(Self { raw })
     }
+    #[inline]
+    pub const fn width(&self) -> u32 {
+        self.raw.width
+    }
+
+    #[inline]
+    pub const fn height(&self) -> u32 {
+        self.raw.height
+    }
 
     pub fn pixels(&self) -> &[u8] {
         unsafe {
