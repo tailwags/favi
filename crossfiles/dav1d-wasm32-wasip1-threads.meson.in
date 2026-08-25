@@ -1,0 +1,32 @@
+# Meson cross file for building dav1d for wasm32-wasip1-threads with
+# wasi-sdk. libavif's LocalDav1d.cmake builds its LOCAL dav1d with meson and
+# only supplies a cross file for Android/Apple; favi's build.rs passes this
+# file through the CROSS_FILE cache variable, which libavif forwards to
+# `meson setup --cross-file=...`.
+#
+# Modeled on dav1d's own crossfiles (dav1d/package/crossfiles/*.meson) and on
+# the compiler flags @napi-rs/cli uses for the same target. The
+# WASI_SDK_PATH placeholder is substituted by favi's build.rs (meson machine
+# files cannot expand environment variables); building for
+# wasm32-wasip1-threads without WASI_SDK_PATH set is a build error.
+
+[binaries]
+c = ['@WASI_SDK_PATH@/bin/clang', '--target=wasm32-wasip1-threads', '--sysroot=@WASI_SDK_PATH@/share/wasi-sysroot', '-pthread', '-mllvm', '-wasm-enable-sjlj']
+ar = '@WASI_SDK_PATH@/bin/llvm-ar'
+strip = '@WASI_SDK_PATH@/bin/llvm-strip'
+
+[built-in options]
+# dav1d only defines -D_GNU_SOURCE itself when meson reports the host system
+# as linux/gnu/emscripten; on wasi the musl-based libc hides
+# clock_gettime/fseeko/... behind feature-test macros under -std=c99 and
+# dav1d's configure checks fail without this.
+c_args = ['-D_GNU_SOURCE']
+
+[properties]
+needs_exe_wrapper = true
+
+[host_machine]
+system = 'wasi'
+cpu_family = 'wasm32'
+cpu = 'wasm32'
+endian = 'little'

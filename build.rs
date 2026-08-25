@@ -1,4 +1,8 @@
-use std::{env, path::PathBuf, process::exit};
+use std::{
+    env, fs,
+    path::{Path, PathBuf},
+    process::exit,
+};
 
 // (cargo feature, libavif CMake option, pkg-config module).
 const CODECS: &[(&str, &str, &str)] = &[
@@ -31,18 +35,72 @@ fn dep_mode(name: &str) -> &'static str {
     }
 }
 
+/// Prints `error: favi: ...` plus an optional indented hint and exits.
+fn fatal(msg: String, hint: Option<&str>) -> ! {
+    eprintln!("error: favi: {msg}");
+    if let Some(hint) = hint {
+        eprintln!("       {hint}");
+    }
+    exit(1);
+}
+
+/// libavif builds its LOCAL dav1d with meson, and LocalDav1d.cmake only
+/// provides a meson cross file for Android/Apple. For wasm32-wasip1-threads
+/// we ship our own template (see crossfiles/dav1d-wasm32-wasip1-threads.meson.in)
+/// and hand it to CMake through the `CROSS_FILE` cache variable, which
+/// LocalDav1d.cmake forwards to `meson setup --cross-file=...`. The variable
+/// is only shadowed by that module's ANDROID/APPLE branches, neither of
+/// which applies on wasm.
+fn dav1d_wasi_cross_file(manifest_dir: &Path) -> Option<PathBuf> {
+    let target = env::var("TARGET").expect("cargo sets TARGET for build scripts");
+
+    if target != "wasm32-wasip1-threads" {
+        return None;
+    }
+
+    let wasi_sdk_path = env::var("WASI_SDK_PATH").unwrap_or_else(|_| {
+        fatal(
+            format!("building for {target} requires WASI_SDK_PATH to be set"),
+            Some(
+                "download wasi-sdk from https://github.com/WebAssembly/wasi-sdk/releases and point WASI_SDK_PATH at it",
+            ),
+        )
+    });
+
+    // Meson machine files cannot expand environment variables, so the
+    // template's placeholder is substituted into a copy in OUT_DIR here.
+    let template_path = manifest_dir.join("crossfiles/dav1d-wasm32-wasip1-threads.meson.in");
+    let template = fs::read_to_string(&template_path).unwrap_or_else(|error| {
+        fatal(
+            format!("failed to read {}: {error}", template_path.display()),
+            None,
+        )
+    });
+
+    let out = PathBuf::from(env::var_os("OUT_DIR").expect("cargo sets OUT_DIR for build scripts"))
+        .join("dav1d-wasi.meson");
+
+    fs::write(&out, template.replace("@WASI_SDK_PATH@", &wasi_sdk_path))
+        .unwrap_or_else(|error| fatal(format!("failed to write {}: {error}", out.display()), None));
+
+    Some(out)
+}
+
 fn main() {
-    let manifest_dir = PathBuf::from(env::var("CARGO_MANIFEST_DIR").unwrap());
+    let manifest_dir = PathBuf::from(
+        env::var("CARGO_MANIFEST_DIR").expect("cargo sets CARGO_MANIFEST_DIR for build scripts"),
+    );
 
     let libavif = manifest_dir.join("libavif");
 
     if !libavif.join("CMakeLists.txt").exists() {
-        eprintln!(
-            "error: libavif source tree not found at {} (is the submodule initialized?)",
-            libavif.display()
+        fatal(
+            format!(
+                "libavif source tree not found at {} (is the submodule initialized?)",
+                libavif.display()
+            ),
+            Some("fix with: git submodule update --init libavif"),
         );
-        eprintln!("       fix with: git submodule update --init libavif");
-        exit(1);
     }
 
     let mut avif = cmake::Config::new(&libavif);
@@ -63,11 +121,13 @@ fn main() {
         .define("AVIF_JPEG", "OFF")
         .configure_arg("-DCMAKE_INSTALL_LIBDIR=lib");
 
-    avif.profile(if env::var("DEBUG").unwrap_or_default() == "true" {
-        "Debug"
-    } else {
-        "Release"
-    });
+    avif.profile(
+        if env::var("DEBUG").expect("cargo sets DEBUG for build scripts") == "true" {
+            "Debug"
+        } else {
+            "Release"
+        },
+    );
 
     avif.define("AVIF_LIBYUV", dep_mode("libyuv"))
         .define("AVIF_LIBSHARPYUV", dep_mode("libsharpyuv"));
@@ -100,6 +160,12 @@ fn main() {
             "AVIF_CODEC_AOM_DECODE",
             if aom_decode { "ON" } else { "OFF" },
         );
+
+    // libavif builds its LOCAL dav1d with meson; on wasm32-wasip1-threads
+    // pass it our cross file (see dav1d_wasi_cross_file).
+    if let Some(cross_file) = dav1d_wasi_cross_file(&manifest_dir) {
+        avif.define("CROSS_FILE", cross_file);
+    }
 
     let build = avif.build();
 
@@ -144,16 +210,14 @@ fn main() {
         feature = "libsharpyuv-system",
     ))]
     for (pkg, feature) in &system {
-        match pkg_config::Config::new().probe(pkg) {
-            Ok(lib) => println!("favi build.rs: system {pkg} {} (pkg-config)", lib.version),
-            Err(error) => {
-                eprintln!("error: favi: pkg-config probe for {pkg} failed: {error}");
-                eprintln!(
-                    "       install it, or disable the `{feature}-system` feature to build it from source"
-                );
-                exit(1);
-            }
-        }
+        pkg_config::Config::new().probe(pkg).unwrap_or_else(|_| {
+            fatal(
+                format!("pkg-config probe for {pkg} failed: {error}"),
+                Some(&format!(
+                    "install it, or disable the `{feature}-system` feature to build it from source"
+                )),
+            )
+        });
     }
 
     // libgav1 and AVM are C++ codecs (absl / tensorflow-lite) in either
@@ -173,7 +237,8 @@ fn main() {
         println!("cargo:rustc-link-lib={cxx}");
     }
 
-    // Re-run if the libavif sources or this script change.
     println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=crossfiles");
     println!("cargo:rerun-if-changed=libavif");
+    println!("cargo:rerun-if-env-changed=WASI_SDK_PATH");
 }
